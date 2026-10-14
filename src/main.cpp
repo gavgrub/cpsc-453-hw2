@@ -4,20 +4,15 @@
 #include <cmath>
 #include <fstream>
 #include <string>
+#include <algorithm>
 
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 800;
 const float SPACE = 0.525f;
-
-// This function draws lines between a given list of vectors
-void drawLines(sf::RenderWindow& window, std::vector<sf::Vertex>& vertices) {
-    for (int i = 0; i + 1 < vertices.size(); i += 2) {
-        window.draw(&vertices[i], 2, sf::PrimitiveType::Lines);
-    }
-}
+const std::string FONT = "C:/Users/grube/Desktop/sfml-starter-with-opengl/cmunit";
 
 // This function gets the size (width, height) of a list of vertices
-sf::FloatRect getSize(const std::vector<sf::Vertex>& vertices) {
+sf::FloatRect getRect(const std::vector<sf::Vertex>& vertices) {
 
     // Return 0 if list of vertices is empty
     if (vertices.empty()) {
@@ -101,7 +96,6 @@ bool loadCharacter(std::string filename, std::vector<sf::Vertex>& vertices) {
 
                     // Calculate the position along the curve
                     float t = static_cast<float>(i) / iterations;
-                    float u = 1.0f - t;
 
                     // Calculate x(t) using the Bezier equation
                     sf::Vector2f xt = std::pow(1.0f - t, 3.0f) * p0 + 3.0f * t * std::pow(1.0f - t, 2.0f) * p1 + 3.0f * std::pow(t, 2.0f) * (1.0f - t) * p2 + std::pow(t, 3.0f) * p3;
@@ -156,7 +150,23 @@ void loadString(const std::string& text, const std::string& directory, std::vect
     }
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+
+    // Load the string
+    std::vector<sf::Vertex> vertices;
+    loadString(argv[1], FONT, vertices);
+
+    // Make the string fit within the window
+    sf::FloatRect rect = getRect(vertices);
+    float margin = 20.0f;
+    float scale = 1.0f;
+
+    if (rect.size.x > 0.0f) {
+        scale = (WIDTH - 2.0f * margin) / rect.size.x;
+    }
+
+    float x = margin - rect.position.x * scale;
+    float y = HEIGHT / 2.0f;
 
     // Create window
 	sf::RenderWindow window(
@@ -177,24 +187,18 @@ int main() {
 			if ( event->is<sf::Event::Closed>() ) {
                 window.close();
 			}
-
-            if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-                
-                // Key press events are used to trigger actions, not to hold them down.
-
-            }
-
-            if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>()) {
-                
-				// key release events are used to trigger actions, not to hold them down.
-
-			}
 		}
+
+        // Move to window space, flipping y since the character files are y-up
+        sf::Transform transform;
+        transform.translate({x, y});
+        transform.scale({scale, -scale});
 
         // Draw to the screen
         window.clear();
+        window.draw(vertices.data(), vertices.size(), sf::PrimitiveType::Lines, sf::RenderStates(transform));
         window.display();
-
     }
 
+    return 0;
 }
