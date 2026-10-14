@@ -16,6 +16,30 @@ void drawLines(sf::RenderWindow& window, std::vector<sf::Vertex>& vertices) {
     }
 }
 
+// This function gets the size (width, height) of a list of vertices
+sf::FloatRect getSize(const std::vector<sf::Vertex>& vertices) {
+
+    // Return 0 if list of vertices is empty
+    if (vertices.empty()) {
+        return sf::FloatRect({0.0f, 0.0f}, {0.0f, 0.0f});
+    }
+
+    float xMin = vertices[0].position.x;
+    float xMax = xMin;
+    float yMin = vertices[0].position.y;
+    float yMax = yMin;
+
+    // Iterate through vertices and check if they are larger / smaller than the current largest / smallest found
+    for (const sf::Vertex& vertex : vertices) {
+        xMin = std::min(xMin, vertex.position.x);
+        xMax = std::max(xMax, vertex.position.x);
+        yMin = std::min(yMin, vertex.position.y);
+        yMax = std::max(yMax, vertex.position.y);
+    }
+
+    return sf::FloatRect({xMin, yMin}, {xMax - xMin, yMax - yMin});
+}
+
 // This function loads a character from a file and stores its lines as vertices
 bool loadCharacter(std::string filename, std::vector<sf::Vertex>& vertices) {
     
