@@ -1,8 +1,16 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <vector>
 
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 800;
+
+// This function draws lines between a given list of vectors
+void drawLines(sf::RenderWindow& window, std::vector<sf::Vertex>& vertices) {
+    for (int i = 0; i + 1 < vertices.size(); i += 2) {
+        window.draw(&vertices[i], 2, sf::PrimitiveType::Lines);
+    }
+}
 
 int main() {
 
