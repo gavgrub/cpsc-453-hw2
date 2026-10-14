@@ -5,11 +5,12 @@
 #include <fstream>
 #include <string>
 #include <algorithm>
+#include <filesystem>
 
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 800;
 const float SPACE = 0.525f;
-const std::string FONT = "C:/Users/grube/Desktop/sfml-starter-with-opengl/cmunit";
+const std::string FONT = std::filesystem::current_path().string() + "/cmunit";
 
 // This function gets the size (width, height) of a list of vertices
 sf::FloatRect getRect(const std::vector<sf::Vertex>& vertices) {
@@ -69,8 +70,8 @@ bool loadCharacter(std::string filename, std::vector<sf::Vertex>& vertices) {
                 sf::Vector2f nextPoint = {x, y};
 
                 // Add the line's endpoints to the vertices
-                vertices.push_back(sf::Vertex(currentPoint));
-                vertices.push_back(sf::Vertex(nextPoint));
+                vertices.push_back(sf::Vertex{currentPoint});
+                vertices.push_back(sf::Vertex{nextPoint});
 
                 // Update the current point
                 currentPoint = nextPoint;
@@ -101,8 +102,8 @@ bool loadCharacter(std::string filename, std::vector<sf::Vertex>& vertices) {
                     sf::Vector2f xt = std::pow(1.0f - t, 3.0f) * p0 + 3.0f * t * std::pow(1.0f - t, 2.0f) * p1 + 3.0f * std::pow(t, 2.0f) * (1.0f - t) * p2 + std::pow(t, 3.0f) * p3;
 
                     // Add the line segment to the vertices
-                    vertices.push_back(sf::Vertex(currentPoint));
-                    vertices.push_back(sf::Vertex(xt));
+                    vertices.push_back(sf::Vertex{currentPoint});
+                    vertices.push_back(sf::Vertex{xt});
 
                     // Update the current point
                     currentPoint = xt;
@@ -113,8 +114,8 @@ bool loadCharacter(std::string filename, std::vector<sf::Vertex>& vertices) {
             
             // End path by connecting the current point to the beginning of the path via a line segment
             case 'Z':
-                vertices.push_back(sf::Vertex(currentPoint));
-                vertices.push_back(sf::Vertex(startPoint));
+                vertices.push_back(sf::Vertex{currentPoint});
+                vertices.push_back(sf::Vertex{startPoint});
                 currentPoint = startPoint;
                 break;
         }
@@ -132,7 +133,7 @@ void loadString(const std::string& text, const std::string& directory, std::vect
     for (char character : text) {
 
         // File path of given character
-        std::string filename = directory + "/" + std::to_string(static_cast<int>(character));
+        std::string filename = directory + "/gly_" + std::to_string(static_cast<int>(character));
 
         // Vertices of the character
         std::vector<sf::Vertex> characterVertices;
@@ -165,8 +166,17 @@ int main(int argc, char* argv[]) {
         scale = (WIDTH - 2.0f * margin) / rect.size.x;
     }
 
-    float x = margin - rect.position.x * scale;
-    float y = HEIGHT / 2.0f;
+    // Middle of the string
+    float xMid = rect.position.x + rect.size.x / 2.0f;
+    float yMid = rect.position.y + rect.size.y / 2.0f;
+
+    // Put string in the middle of the window
+    float x = WIDTH / 2.0f - xMid * scale;
+    float y = HEIGHT / 2.0f + yMid * scale;
+
+    // Movement and zoom amounts per frame
+    float speed = 8.0f;
+    float zoom = 1.02f;
 
     // Create window
 	sf::RenderWindow window(
@@ -178,8 +188,9 @@ int main(int argc, char* argv[]) {
 
     // set additional window properties
     window.setKeyRepeatEnabled(false);
+    window.setFramerateLimit(60);
 
-    // the event/logic/whatever loop
+    // Event loop
     while (window.isOpen()) {
 		while ( const std::optional event = window.pollEvent() ) {
 
@@ -189,7 +200,31 @@ int main(int argc, char* argv[]) {
 			}
 		}
 
-        // Move to window space, flipping y since the character files are y-up
+        // Scroll
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
+            x += speed;
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
+            x -= speed;
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
+            y += speed;
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
+            y -= speed;
+        }
+
+        // Zoom in / out
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Equal)) {
+            x = WIDTH / 2.0f - (WIDTH / 2.0f - x) * zoom;
+            y = HEIGHT / 2.0f - (HEIGHT / 2.0f - y) * zoom;
+            scale *= zoom;
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Hyphen)) {
+            x = WIDTH / 2.0f - (WIDTH / 2.0f - x) / zoom;
+            y = HEIGHT / 2.0f - (HEIGHT / 2.0f - y) / zoom;
+            scale /= zoom;
+        }
+
+        // Move the window to correctly 
         sf::Transform transform;
         transform.translate({x, y});
         transform.scale({scale, -scale});
