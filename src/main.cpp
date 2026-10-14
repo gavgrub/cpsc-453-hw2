@@ -7,6 +7,7 @@
 
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 800;
+const float SPACE = 0.525f;
 
 // This function draws lines between a given list of vectors
 void drawLines(sf::RenderWindow& window, std::vector<sf::Vertex>& vertices) {
@@ -43,7 +44,7 @@ bool loadCharacter(std::string filename, std::vector<sf::Vertex>& vertices) {
 
             // Draw a line from the current point to the specified point
             case 'L': {
-                
+
                 // Draw a line from the current point to the next point
                 file >> x >> y;
                 sf::Vector2f nextPoint = {x, y};
@@ -103,6 +104,32 @@ bool loadCharacter(std::string filename, std::vector<sf::Vertex>& vertices) {
 
     // Return true if the file was processed
     return true;
+}
+
+// This function creates a string by generating paths for each character in the string
+void loadString(const std::string& text, const std::string& directory, std::vector<sf::Vertex>& vertices) {
+
+    float x = 0.0f;
+
+    for (char character : text) {
+
+        // File path of given character
+        std::string filename = directory + "/" + std::to_string(static_cast<int>(character));
+
+        // Vertices of the character
+        std::vector<sf::Vertex> characterVertices;
+
+        // Add the character if it exists, shifted by the current position
+        if (loadCharacter(filename, characterVertices)) {
+            for (sf::Vertex& vertex : characterVertices) {
+                vertex.position.x += x;
+                vertices.push_back(vertex);
+            }
+        }
+
+        // Move to the next character
+        x += SPACE;
+    }
 }
 
 int main() {
