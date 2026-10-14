@@ -1,11 +1,36 @@
-# CMake SFML Project Template (with OpenGL)
+# Homework 2
 
-Use this template repository if you would like to mix SFML Graphics with OpenGL. 
+Gavin Grubert
 
-This template is based on the [original template repository](https://github.com/SFML/cmake-sfml-project) provided by SFML. The only changes made are to some compilation flags. In particular, building of network and audio components in disabled as we do not need these components in the course. This modified version should also compile without issues in the graphics lab (MS 239)
+gavin.grubert@ucalgary.ca
 
-Additionally, OpenGL is set up via [GLAD](https://wikis.khronos.org/opengl/OpenGL_Loading_Library). For cross-platform compatibility, this repositroty uses an older version of OpenGL (2.1) as there is currently an [issue with mixing SFML Graphics with OpenGL on MacOS](https://www.sfml-dev.org/tutorials/3.0/window/opengl/). 
+October 13, 2026
 
-For questions or concerns, please get in touch with the instructor or one of the TAs.
+CPSC 453
 
+## Compilation
 
+The project can be compiled by the following in the main directory:
+
+```bash
+cmake -B build -S .
+cmake --build build
+```
+
+## Usage
+
+### Running
+
+The project can be run from the main directory as followed:
+
+```bash
+./ ./build/bin/Debug/main <string>
+```
+
+Where `<string>` is the string you wish to render.
+
+### Controls
+
+Arrow keys: move around the camera
+
+= / -: zoom in / out
